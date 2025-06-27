@@ -29,7 +29,10 @@ pub fn headermap_to_hashmap(header: &HeaderMap<HeaderValue>) -> HashMap<String, 
     let mut hashmap: HashMap<String, String> = HashMap::with_capacity(header.len());
     for (k, v) in header {
         if let Ok(v) = v.to_str() {
-            hashmap.insert(k.to_string(), v.to_string());
+            hashmap.entry(k.to_string()).and_modify(|buffer|{
+                buffer.push_str(",");
+                buffer.push_str(v);
+            }).or_insert_with(||v.to_string());
         }
     }
 
