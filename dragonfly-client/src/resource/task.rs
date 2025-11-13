@@ -1092,6 +1092,7 @@ impl Task {
                     created_at: Some(prost_wkt_types::Timestamp::from(metadata.created_at)),
                 };
 
+                info!("start to download piece {}, need_piece_content={}",piece_id,need_piece_content);
                 // If need_piece_content is true, read the piece content from the local.
                 if need_piece_content {
                     let mut reader = piece_manager
@@ -1117,7 +1118,7 @@ impl Task {
 
                     piece.content = Some(content);
                 }
-
+                info!("Send the download piece finished request. {}",piece_id);
                 // Send the download piece finished request.
                 in_stream_tx
                     .send_timeout(
@@ -1143,7 +1144,7 @@ impl Task {
                         );
                         interrupt.store(true, Ordering::SeqCst);
                     });
-
+                info!("Send the download progress. {}",piece_id);
                 // Send the download progress.
                 download_progress_tx
                     .send_timeout(
