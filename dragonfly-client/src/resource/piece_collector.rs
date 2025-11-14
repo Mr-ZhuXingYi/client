@@ -199,6 +199,7 @@ impl PieceCollector {
                     );
                 })?;
 
+                info!("dfdaemon_upload_client from parent {}", parent.id);
                 let response = dfdaemon_upload_client
                     .sync_pieces(SyncPiecesRequest {
                         host_id: host_id.to_string(),
@@ -213,10 +214,12 @@ impl PieceCollector {
                         error!("sync pieces from parent {} failed: {}", parent.id, err);
                     })?;
 
+                info!("get out_stream from parent {}", parent.id);
                 // If the response repeating timeout exceeds the piece download timeout, the stream will return error.
                 let out_stream = response.into_inner().timeout(collected_piece_timeout);
                 tokio::pin!(out_stream);
 
+                info!("get message from parent {}", parent.id);
                 while let Some(message) = out_stream.try_next().await.inspect_err(|err| {
                     error!("sync pieces from parent {} failed: {}", parent.id, err);
                 })? {

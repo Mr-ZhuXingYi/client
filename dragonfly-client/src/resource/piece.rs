@@ -418,6 +418,7 @@ impl Piece {
             .storage
             .download_piece_started(piece_id, number)
             .await?;
+        info!("finished Record start piece {}",piece_id);
 
         // If the piece is downloaded by the other thread,
         // return the piece directly.
@@ -425,7 +426,7 @@ impl Piece {
             info!("finished piece {} from local", piece_id);
             return Ok(piece);
         }
-
+        info!("start limiter for piece {}",piece_id);
         if is_prefetch {
             // Acquire the prefetch rate limiter.
             self.prefetch_rate_limiter.acquire(length as usize).await;
@@ -444,6 +445,7 @@ impl Piece {
             Error::InvalidPeer(parent.id.clone())
         })?;
 
+        info!("start request download_piece {}",piece_id);
         let (content, offset, digest) = self
             .downloader
             .download_piece(
@@ -461,6 +463,7 @@ impl Piece {
             })?;
         let mut reader = Cursor::new(content);
 
+        info!("Record the finish of downloading piece {}",piece_id);
         // Record the finish of downloading piece.
         match self
             .storage
